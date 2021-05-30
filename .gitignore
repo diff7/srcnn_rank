@@ -1,6 +1,7 @@
 .DS_Store
 .idea
-/wandb/*
+**/wandb/
 __pycache__
 .ipyn*
-results*
+**/results/
+**/pre_trained

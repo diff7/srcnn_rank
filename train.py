@@ -154,10 +154,6 @@ if __name__ == "__main__":
         optimizer, step_size=1, gamma=0.5
     )
 
-    # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-    #     optimizer, T_max=1000, eta_min=1e-6
-    # )
-
     train_dataset = PatchDataset(cfg, train=True)
     train_dataloader = DataLoader(
         dataset=train_dataset,
