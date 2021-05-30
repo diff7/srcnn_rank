@@ -22,7 +22,7 @@ num_workers: 10
 num_epochs: 150
 
 use_wandb: true
-wandb_key: "beca9453c7ef6a20e21d5705275a0ff72842cbf3"
+wandb_key:
 run_name: patch_size_33
 exp_name: srcnn
 

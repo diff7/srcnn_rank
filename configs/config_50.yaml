@@ -13,7 +13,7 @@ stride: 60
 
 # TRANING
 load_weiths: #'/home/dev/work_main/2021/crcnn/resutls/epoch_25.909.pth'
-results_dir: './resutls/'
+results_dir: './results/'
 device: 1
 seed: 1
 lr: 1e-3
@@ -22,7 +22,7 @@ num_workers: 10
 num_epochs: 20
 
 use_wandb: true
-wandb_key: "beca9453c7ef6a20e21d5705275a0ff72842cbf3"
+wandb_key: 
 run_name: batch_50_1e3_ADAM_step_05_test_CI
 exp_name: srcnn
 

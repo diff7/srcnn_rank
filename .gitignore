@@ -6,5 +6,6 @@ __pycache__/
 **/results/
 **/pre_trained/
 results/
+resutls/
 pre_trained/
 wandb/
