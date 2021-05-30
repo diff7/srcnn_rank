@@ -1,31 +1,89 @@
-import h5py
-import numpy as np
-from torch.utils.data import Dataset
+import os
+import torch.utils.data.dataset
+import torchvision.transforms as transforms
+from PIL import Image
 
 
-class TrainDataset(Dataset):
-    def __init__(self, h5_file):
-        super(TrainDataset, self).__init__()
-        self.h5_file = h5_file
+def check_image_file(filename):
+    r"""Filter non image files in directory.
+    Args:
+        filename (str): File name under path.
+    Returns:
+        Return True if bool(x) is True for any x in the iterable.
+    """
+    return any(
+        filename.endswith(extension)
+        for extension in [
+            "bmp",
+            ".png",
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".PNG",
+            ".jpeg",
+            ".JPEG",
+        ]
+    )
 
-    def __getitem__(self, idx):
-        with h5py.File(self.h5_file, 'r') as f:
-            return np.expand_dims(f['lr'][idx] / 255., 0), np.expand_dims(f['hr'][idx] / 255., 0)
+
+class PatchDataset(torch.utils.data.dataset.Dataset):
+    r"""An abstract class representing a :class:`Dataset`."""
+
+    def __init__(self, cfg, train=True):
+        r"""
+        Args:
+            input_dir (str): The directory address where the data image is stored.
+            target_dir (str): The directory address where the target image is stored.
+        """
+        super(PatchDataset, self).__init__()
+        if train:
+            folder_type = "train/"
+        else:
+            folder_type = "valid/"
+
+        folder_path_hr = os.path.join(cfg.data_processed_hr, folder_type)
+        folder_path_lr = os.path.join(cfg.data_processed_lr, folder_type)
+        self.input_filenames = [
+            os.path.join(folder_path_lr, x)
+            for x in os.listdir(folder_path_hr)
+            if check_image_file(x)
+        ]
+        self.target_filenames = [
+            os.path.join(folder_path_hr, x)
+            for x in os.listdir(folder_path_lr)
+            if check_image_file(x)
+        ]
+
+        self.transforms = transforms.Compose(
+            [transforms.ToTensor()]  # Note - to tensor divides by 255
+        )
+
+    def __getitem__(self, index):
+        r"""Get image source file.
+        Args:
+            index (int): Index position in image list.
+        Returns:
+            Low resolution image, high resolution image.
+        """
+
+        input_img = Image.open(self.input_filenames[index]).convert("YCbCr")
+        target_img = Image.open(self.target_filenames[index]).convert("YCbCr")
+
+        # We transform image and train the network only using Y - luminiscense
+        # To produce an image back we improve Y and restore image with previous dimenisons
+
+        input_img, _, _ = input_img.split()
+        target_img, _, _ = target_img.split()
+
+        input_img = self.transforms(input_img)
+        target_img = self.transforms(target_img)
+
+        return (
+            input_img,
+            target_img,
+            self.input_filenames[index],
+            self.target_filenames[index],
+        )
 
     def __len__(self):
-        with h5py.File(self.h5_file, 'r') as f:
-            return len(f['lr'])
-
-
-class EvalDataset(Dataset):
-    def __init__(self, h5_file):
-        super(EvalDataset, self).__init__()
-        self.h5_file = h5_file
-
-    def __getitem__(self, idx):
-        with h5py.File(self.h5_file, 'r') as f:
-            return np.expand_dims(f['lr'][str(idx)][:, :] / 255., 0), np.expand_dims(f['hr'][str(idx)][:, :] / 255., 0)
-
-    def __len__(self):
-        with h5py.File(self.h5_file, 'r') as f:
-            return len(f['lr'])
+        return len(self.input_filenames)

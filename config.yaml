@@ -1,0 +1,38 @@
+# used for data preprocessing:
+data: '/home/dev/data_main/DIV2K'
+data_hr:  '/home/dev/data_main/DIV2K/HR'
+data_lr:  '/home/dev/data_main/DIV2K/LR'
+
+data_processed_hr: '/home/dev/data_main/DIV2K/processed/HR'
+data_processed_lr: '/home/dev/data_main/DIV2K/processed/LR'
+val_folder: '/valid/'
+train_folder: '/train/'
+scale: 2
+patch_size: 33
+stride: 33
+
+# TRANING
+load_weiths: 
+results_dir: './resutls_bigger/'
+device: 2
+seed: 1
+lr: 1e-4
+batch_size: 128
+num_workers: 10
+num_epochs: 150
+
+use_wandb: true
+wandb_key: "beca9453c7ef6a20e21d5705275a0ff72842cbf3"
+run_name: patch_size_33
+exp_name: srcnn
+
+log_step : 100 
+save_steps: 1000
+
+
+benchmark: false # use true for reproducibility 
+
+model:
+  ker_one: 9
+  ker_two: 5
+  ker_three: 5
