@@ -4,4 +4,4 @@
 __pycache__
 .ipyn*
 **/results/
-**/pre_trained
+**/pre_trained/
