@@ -2,7 +2,7 @@ import os
 import copy
 
 import torch
-from torch import ComplexFloatStorage, nn
+from torch import nn
 import torch.optim as optim
 import torch.backends.cudnn as cudnn
 from torch.utils.data.dataloader import DataLoader
@@ -15,6 +15,16 @@ import wandb as wandb
 from omegaconf import OmegaConf as omg
 
 
+from counters.counters import (
+    SSIMCounter,
+    PSNRCounter,
+    MSECounter,
+    CounterIterator,
+)
+
+CONFIG = "./configs/config_50.yaml"
+
+
 def save_model(cfg, model, psnr):
     torch.save(
         model.state_dict(),
@@ -23,7 +33,7 @@ def save_model(cfg, model, psnr):
 
 
 def train_one_epoch(
-    cfg, model, train_dataset, device, scheduler=None, logger=None
+    cfg, model, train_dataset, device, scheduler=None, CI=None, logger=None
 ):
     model.train()
     epoch_losses = AverageMeter()
@@ -54,6 +64,9 @@ def train_one_epoch(
 
             t.set_postfix(loss="{:.6f}".format(epoch_losses.avg))
             t.update(len(inputs))
+
+            if CI is not None:
+                CI.update(inputs, path_input, labels)
 
             if logger is not None:
                 if i % cfg.log_step == 0:
@@ -107,7 +120,7 @@ def eval_and_save(cfg, model, device, best_psnr, logger=None):
 
 
 if __name__ == "__main__":
-    cfg = omg.load("./config_50.yaml")
+    cfg = omg.load(CONFIG)
 
     if cfg.use_wandb:
         os.environ["WANDB_API_KEY"] = cfg.wandb_key
@@ -117,6 +130,11 @@ if __name__ == "__main__":
 
     if not os.path.exists(cfg.results_dir):
         os.makedirs(cfg.results_dir)
+
+    CI = CounterIterator(cfg.results_dir + "/ranks/")
+    CI.add(SSIMCounter, "SSIMCounter")
+    CI.add(PSNRCounter, "PSNRCounter")
+    CI.add(MSECounter, "MSECounter")
 
     cudnn.benchmark = cfg.benchmark
     device = torch.device(cfg.device if torch.cuda.is_available() else "cpu")
@@ -151,7 +169,7 @@ if __name__ == "__main__":
     )
 
     scheduler = torch.optim.lr_scheduler.StepLR(
-        optimizer, step_size=1, gamma=0.5
+        optimizer, step_size=1, gamma=0.7
     )
 
     train_dataset = PatchDataset(cfg, train=True)
@@ -176,5 +194,6 @@ if __name__ == "__main__":
     for epoch in range(cfg.num_epochs):
         best_psnr = eval_and_save(cfg, model, device, best_psnr, logger=wandb)
         train_one_epoch(
-            cfg, model, train_dataset, device, scheduler, logger=wandb
+            cfg, model, train_dataset, device, scheduler, CI, logger=wandb
         )
+        CI.save(epoch)

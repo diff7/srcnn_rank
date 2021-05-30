@@ -23,7 +23,7 @@ num_epochs: 20
 
 use_wandb: true
 wandb_key: "beca9453c7ef6a20e21d5705275a0ff72842cbf3"
-run_name: batch_50_1e3_ADAM_step_05
+run_name: batch_50_1e3_ADAM_step_05_test_CI
 exp_name: srcnn
 
 log_step : 100 

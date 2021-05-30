@@ -1,56 +1,28 @@
 import torch
-from torch.distributions import Categorical
-
-softmax = torch.nn.Softmax(dim=3)
-cross_entropy = torch.nn.CrossEntropyLoss(ignore_index=255, reduction="none")
+from counters.ssim import ssim
 
 
-def Entropy(outs, grounds=None):
-    outs = outs.transpose(1, 3)
-    maxed = softmax(outs)
-    entropy = Categorical(probs=maxed).entropy()
-    return entropy.sum(1).sum(1)
+def mse(img1, img2):
+    return (img1 - img2) ** 2
 
 
-def EntropyMax(preds, grounds, th=0.6):
-    mask = 1 - (grounds == 255).int()
-    outs = preds.transpose(1, 3)
-    entropy = Categorical(logits=outs).entropy()
-    entropy = entropy * mask
-    return entropy.max(1)[0].max(1)[0]
+def psnr(img1, img2):
+    return 10.0 * torch.log10(1.0 / (1e-5 + mse(img1, img2)))
 
 
-def EntropyTH(preds, grounds, th=0.6):
-    mask = 1 - (grounds == 255).int()
-    outs = preds.transpose(1, 3)
-    entropy = Categorical(logits=outs).entropy()
-    entropy = entropy * mask
-    return (entropy > th).sum(1).sum(1)
+def SSIMCounter(preds, grounds):
+    scores = torch.zeros(preds.shape[0])
+    for i in range(len(scores)):
+        scores[i] = ssim(preds[i].unsqueeze(0), grounds[i].unsqueeze(0))
+    return scores
 
 
-def EntropyNoBackground(outs, grounds=None):
-    mask = torch.where(grounds > 0, 1, 0)
-    outs = outs.transpose(1, 3)
-    maxed = softmax(outs)
-    entropy = Categorical(probs=maxed).entropy()
-    entropy = entropy * mask
-    return entropy.sum(1).sum(1)
+def PSNRCounter(preds, grounds):
+    return psnr(preds, grounds).reshape(4, -1).mean(1)
 
 
-def CrossEntropy(
-    outs,
-    grounds=None,
-):
-    cross_ent = cross_entropy(outs, grounds)
-    return cross_ent.sum(1).sum(1)
-
-
-def CrossEntropyNoBackground(outs, grounds=None):
-
-    mask = torch.where(grounds > 0, 1, 0)
-    cross_ent = cross_entropy(outs, grounds)
-    cross_ent = cross_ent * mask
-    return cross_ent.sum(1).sum(1)
+def MSECounter(preds, grounds):
+    return mse(preds, grounds).reshape(4, -1).mean(1)
 
 
 class Counter:
