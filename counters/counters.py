@@ -18,11 +18,11 @@ def SSIMCounter(preds, grounds):
 
 
 def PSNRCounter(preds, grounds):
-    return psnr(preds, grounds).reshape(4, -1).mean(1)
+    return psnr(preds, grounds).reshape(preds.shape[0], -1).mean(1)
 
 
 def MSECounter(preds, grounds):
-    return mse(preds, grounds).reshape(4, -1).mean(1)
+    return mse(preds, grounds).reshape(preds.shape[0], -1).mean(1)
 
 
 class Counter:
@@ -37,8 +37,12 @@ class Counter:
         scores = scores.detach().cpu().numpy()
         for i in range(len(names)):
             if names[i] in self.counter:
+
                 self.counter[names[i]] = self.counter[names[i]] + scores[i]
             else:
+                # print("SHAPES")
+                # print(len(names))
+                # print(scores.shape)
                 self.counter[names[i]] = scores[i]
 
     def save(self, epoch):

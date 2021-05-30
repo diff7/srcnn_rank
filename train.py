@@ -192,8 +192,8 @@ if __name__ == "__main__":
     best_psnr = 0.0
 
     for epoch in range(cfg.num_epochs):
-        best_psnr = eval_and_save(cfg, model, device, best_psnr, logger=wandb)
         train_one_epoch(
             cfg, model, train_dataset, device, scheduler, CI, logger=wandb
         )
         CI.save(epoch)
+        best_psnr = eval_and_save(cfg, model, device, best_psnr, logger=wandb)

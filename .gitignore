@@ -5,6 +5,6 @@ __pycache__/
 .ipyn*
 **/results/
 **/pre_trained/
-
+results/
 pre_trained/
 wandb/
