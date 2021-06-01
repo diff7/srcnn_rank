@@ -11,9 +11,12 @@ scale: 2
 patch_size: 50
 stride: 60
 
+subset: './subsets/MSE_3_5e5_linear.txt'
+rank_items: false
+
 # TRANING
 load_weiths: #'/home/dev/work_main/2021/crcnn/resutls/epoch_25.909.pth'
-results_dir: './results/'
+results_dir: './results/MSE_3_5e5_linear/'
 device: 1
 seed: 1
 lr: 1e-3
@@ -22,8 +25,8 @@ num_workers: 10
 num_epochs: 20
 
 use_wandb: true
-wandb_key: 
-run_name: batch_50_1e3_ADAM_step_05_test_CI
+wandb_key: "beca9453c7ef6a20e21d5705275a0ff72842cbf3"
+run_name: MSE_3_5e5_linear
 exp_name: srcnn
 
 log_step : 100 

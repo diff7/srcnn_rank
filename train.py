@@ -1,6 +1,7 @@
 import os
 import copy
-
+import random
+import warnings
 import torch
 from torch import nn
 import torch.optim as optim
@@ -122,6 +123,18 @@ def eval_and_save(cfg, model, device, best_psnr, logger=None):
 if __name__ == "__main__":
     cfg = omg.load(CONFIG)
 
+    if cfg.seed is not None:
+        random.seed(cfg.seed)
+        torch.manual_seed(cfg.seed)
+        cudnn.deterministic = True
+        warnings.warn(
+            "You have chosen to seed training. "
+            "This will turn on the CUDNN deterministic setting, "
+            "which can slow down your training considerably! "
+            "You may see unexpected behavior when restarting "
+            "from checkpoints."
+        )
+
     if cfg.use_wandb:
         os.environ["WANDB_API_KEY"] = cfg.wandb_key
         wandb.init(name=cfg.run_name, project=cfg.exp_name, reinit=True)
@@ -131,12 +144,14 @@ if __name__ == "__main__":
     if not os.path.exists(cfg.results_dir):
         os.makedirs(cfg.results_dir)
 
-    CI = CounterIterator(cfg.results_dir + "/ranks/")
-    CI.add(SSIMCounter, "SSIMCounter")
-    CI.add(PSNRCounter, "PSNRCounter")
-    CI.add(MSECounter, "MSECounter")
+    if cfg.rank_items:
+        CI = CounterIterator(cfg.results_dir + "/ranks/")
+        CI.add(SSIMCounter, "SSIMCounter")
+        CI.add(PSNRCounter, "PSNRCounter")
+        CI.add(MSECounter, "MSECounter")
+    else:
+        CI = None
 
-    cudnn.benchmark = cfg.benchmark
     device = torch.device(cfg.device if torch.cuda.is_available() else "cpu")
     print("using :", device)
     torch.manual_seed(cfg.seed)
@@ -186,8 +201,6 @@ if __name__ == "__main__":
         dataset=eval_dataset, shuffle=True, batch_size=1
     )
 
-    best_weights = copy.deepcopy(model.state_dict())
-
     best_epoch = 0
     best_psnr = 0.0
 
@@ -195,5 +208,6 @@ if __name__ == "__main__":
         train_one_epoch(
             cfg, model, train_dataset, device, scheduler, CI, logger=wandb
         )
-        CI.save(epoch)
+        if cfg.rank_items:
+            CI.save(epoch)
         best_psnr = eval_and_save(cfg, model, device, best_psnr, logger=wandb)

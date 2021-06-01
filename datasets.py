@@ -26,6 +26,10 @@ def check_image_file(filename):
     )
 
 
+def fitler_subset(orig, sub):
+    return set(orig).intersection(set(sub))
+
+
 class PatchDataset(torch.utils.data.dataset.Dataset):
     r"""An abstract class representing a :class:`Dataset`."""
 
@@ -43,16 +47,31 @@ class PatchDataset(torch.utils.data.dataset.Dataset):
 
         folder_path_hr = os.path.join(cfg.data_processed_hr, folder_type)
         folder_path_lr = os.path.join(cfg.data_processed_lr, folder_type)
+
+        lr_files = os.listdir(folder_path_lr)
+        hr_files = os.listdir(folder_path_hr)
+
+        if (cfg.subset is not None) and train:
+            print("FILTERING A SUBSET")
+            with open(cfg.subset, "r") as f:
+                subset = f.read()
+                subset = subset.split("\n")
+
+            hr_files = fitler_subset(hr_files, subset)
+            lr_files = fitler_subset(lr_files, subset)
+
         self.input_filenames = [
             os.path.join(folder_path_lr, x)
-            for x in os.listdir(folder_path_hr)
+            for x in lr_files
             if check_image_file(x)
         ]
         self.target_filenames = [
             os.path.join(folder_path_hr, x)
-            for x in os.listdir(folder_path_lr)
+            for x in hr_files
             if check_image_file(x)
         ]
+
+        print(f"DATASET SIZE:{len(self.input_filenames)}")
 
         self.transforms = transforms.Compose(
             [transforms.ToTensor()]  # Note - to tensor divides by 255
