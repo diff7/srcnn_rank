@@ -11,13 +11,13 @@ scale: 2
 patch_size: 50
 stride: 60
 
-subset: './subsets/MSE_3_5e5_linear.txt'
-rank_items: false
+subset: #'./subsets/MSE_3_5e5_linear.txt'
+rank_items: true
 
 # TRANING
 load_weiths: #'/home/dev/work_main/2021/crcnn/resutls/epoch_25.909.pth'
-results_dir: './results/MSE_3_5e5_linear/'
-device: 1
+results_dir: './results/ranker_uknown/'
+device: 2
 seed: 1
 lr: 1e-3
 batch_size: 128

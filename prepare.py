@@ -73,7 +73,7 @@ def prep_eval(cfg):
 
 if __name__ == "__main__":
 
-    cfg = omg.load("./config.yaml")
+    cfg = omg.load("./configs/config_50.yaml")
     os.makedirs(cfg.data_processed_hr + cfg.train_folder, exist_ok=True)
     os.makedirs(cfg.data_processed_lr + cfg.train_folder, exist_ok=True)
 

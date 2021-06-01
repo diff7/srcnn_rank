@@ -67,7 +67,7 @@ def train_one_epoch(
             t.update(len(inputs))
 
             if CI is not None:
-                CI.update(inputs, path_input, labels)
+                CI.update(preds, path_input, labels)
 
             if logger is not None:
                 if i % cfg.log_step == 0:
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     )
 
     scheduler = torch.optim.lr_scheduler.StepLR(
-        optimizer, step_size=1, gamma=0.7
+        optimizer, step_size=3, gamma=0.7
     )
 
     train_dataset = PatchDataset(cfg, train=True)
