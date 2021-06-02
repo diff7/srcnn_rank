@@ -46,12 +46,15 @@ def train_one_epoch(
         t.set_description("epoch: {}/{}".format(epoch, cfg.num_epochs - 1))
 
         for i, data in enumerate(train_dataloader):
+
             inputs, labels, path_input, path_target = data
 
             inputs = inputs.to(device)
             labels = labels.to(device)
 
             preds = model(inputs)
+            if CI is not None:
+                CI.update(preds, path_input, labels)
 
             loss = criterion(preds, labels)
             loss_sanity = criterion(inputs, labels)
@@ -65,9 +68,6 @@ def train_one_epoch(
 
             t.set_postfix(loss="{:.6f}".format(epoch_losses.avg))
             t.update(len(inputs))
-
-            if CI is not None:
-                CI.update(preds, path_input, labels)
 
             if logger is not None:
                 if i % cfg.log_step == 0:

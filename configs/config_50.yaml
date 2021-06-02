@@ -11,13 +11,13 @@ scale: 2
 patch_size: 50
 stride: 60
 
-subset: #'./subsets/MSE_3_5e5_linear.txt'
+subset: #'./subsets/SSIM_30_100kstart.txt'
 rank_items: true
 
 # TRANING
 load_weiths: #'/home/dev/work_main/2021/crcnn/resutls/epoch_25.909.pth'
-results_dir: './results/ranker_uknown/'
-device: 2
+results_dir: './results/ranker_before/'
+device: 0
 seed: 1
 lr: 1e-3
 batch_size: 128
@@ -26,7 +26,7 @@ num_epochs: 20
 
 use_wandb: true
 wandb_key: "beca9453c7ef6a20e21d5705275a0ff72842cbf3"
-run_name: MSE_3_5e5_linear
+run_name: ranker_FULL
 exp_name: srcnn
 
 log_step : 100 

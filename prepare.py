@@ -81,6 +81,6 @@ if __name__ == "__main__":
     os.makedirs(cfg.data_processed_lr + cfg.val_folder, exist_ok=True)
 
     print("MAKING TRAIN")
-    prep_train(cfg)
-    print("MAKING VAL")
-    prep_eval(cfg)
+#    prep_train(cfg)
+#    print("MAKING VAL")
+#    prep_eval(cfg)
